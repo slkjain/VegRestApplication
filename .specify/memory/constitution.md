@@ -1,50 +1,48 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: template → 1.0.0
+Modified principles: template placeholders → I. Code Quality, II. Testing Standards, III. User Experience Consistency, IV. Performance Requirements
+Added sections: Non-Functional Requirements, Development Workflow
+Removed sections: template placeholder principle 5
+Templates reviewed: .specify/templates/plan-template.md ✅ aligned, .specify/templates/spec-template.md ✅ aligned, .specify/templates/tasks-template.md ✅ aligned
+Follow-up TODOs: none
+-->
+
+# VegRestApplication Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Code Quality
+All code MUST meet agreed style, linting, and static analysis requirements before merge. Code MUST be modular, readable, and maintainable; duplication MUST be minimized and complexity MUST be justified in the PR description.
+Rationale: High-quality code reduces defects, shortens review cycles, and prevents long-term technical debt.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Testing Standards
+All production behavior MUST be covered by automated tests before features are accepted. Unit tests MUST validate logic, integration tests MUST verify cross-component behavior, and regression tests MUST protect resolved defects.
+Rationale: Consistent testing ensures reliability, preserves quality as the application evolves, and prevents regressions.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. User Experience Consistency
+User-facing changes MUST preserve established interaction patterns, messaging, and visual consistency across screens and endpoints. Accessibility, clarity, and predictable workflows MUST be validated through review and demonstration.
+Rationale: Consistent UX reduces user friction, improves trust, and enables users to complete tasks reliably.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Performance Requirements
+Every feature MUST define measurable performance goals and meet those targets under realistic load. Performance-critical paths MUST be profiled and optimized, and regressions MUST be detected by automated checks or CI validation.
+Rationale: Performance requirements keep the application responsive, scalable, and efficient for real-world use.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+## Non-Functional Requirements
+- Static analysis and formatting MUST run on all code before merge.
+- CI MUST execute the full test suite and approve only passing changes.
+- Code reviews MUST verify adherence to these principles and document any approved exceptions.
+- Performance budgets and metrics MUST be defined for new features and reviewed as part of the implementation plan.
+- Accessibility and usability checks MUST accompany any user-facing update.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
-
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Workflow
+- All work MUST proceed through pull requests with at least one peer review.
+- Changes that affect quality, testing, UX, or performance MUST cite this constitution in the PR description.
+- Any deviation from these principles MUST be documented, justified, and approved by a reviewer.
+- Significant architecture, quality, or performance decisions MUST include clear acceptance criteria and validation steps.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This constitution is the authoritative guide for code quality, testing, user experience, and performance decisions in VegRestApplication. Changes to these principles require a documented rationale, peer review, and an updated constitution entry.
+Amendments MUST be versioned explicitly. Reviewers and CI MUST verify compliance during PR review, and periodic audits SHOULD confirm that active development continues to follow these principles.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-05-11 | **Last Amended**: 2026-05-11
