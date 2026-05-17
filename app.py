@@ -63,23 +63,30 @@ def create_session_state() -> None:
         st.session_state.error_message = ""
 
 
-def map_status_classification(status: str) -> str:
-    if status == "Pure Vegetarian":
+def map_status_classification(is_pure_vegetarian: Optional[bool]) -> str:
+    if is_pure_vegetarian is True:
         return "status-pure"
-    if status == "Not Pure Vegetarian":
+    if is_pure_vegetarian is False:
         return "status-not"
     return "status-unknown"
 
 
 def render_restaurant_card(restaurant: Restaurant) -> None:
-    status_class = map_status_classification(restaurant.is_pure_vegetarian or "Unknown")
+    status_class = map_status_classification(restaurant.is_pure_vegetarian)
+    status_text = (
+        "Pure Vegetarian"
+        if restaurant.is_pure_vegetarian is True
+        else "Not Pure Vegetarian"
+        if restaurant.is_pure_vegetarian is False
+        else "Unknown"
+    )
     st.markdown("<div class='restaurant-card'>", unsafe_allow_html=True)
     st.markdown(f"### {restaurant.name}")
     st.markdown(f"**Address:** {restaurant.address}")
     if restaurant.rating is not None:
         st.markdown(f"**Rating:** {restaurant.rating}")
     st.markdown(
-        f"<span class='status-pill {status_class}'>{restaurant.is_pure_vegetarian or 'Unknown'}</span>",
+        f"<span class='status-pill {status_class}'>{status_text}</span>",
         unsafe_allow_html=True,
     )
     if restaurant.review_snippet:
@@ -143,7 +150,7 @@ def on_search() -> None:
 def filter_restaurants(restaurants: List[Restaurant], only_vegetarian: bool) -> List[Restaurant]:
     if not only_vegetarian:
         return restaurants
-    return [r for r in restaurants if r.is_pure_vegetarian == "Pure Vegetarian"]
+    return [r for r in restaurants if r.is_pure_vegetarian is True]
 
 
 def main() -> None:
