@@ -30,8 +30,10 @@ def local_css() -> None:
             border-radius: 999px;
             font-size: 0.9rem;
             font-weight: 600;
+            margin-right: 8px;
         }
         .status-pure { background: #d4f5d4; color: #1f6b1f; }
+        .status-vegan { background: #d0e6ff; color: #0f4c81; }
         .status-not { background: #ffe2e0; color: #8b1a1a; }
         .status-unknown { background: #f7f0d6; color: #705b10; }
         .review-snippet { margin-top: 8px; color: #555; }
@@ -72,12 +74,26 @@ def map_status_classification(is_pure_vegetarian: Optional[bool]) -> str:
 
 
 def render_restaurant_card(restaurant: Restaurant) -> None:
-    status_class = map_status_classification(restaurant.is_pure_vegetarian)
-    status_text = (
+    pure_class = map_status_classification(restaurant.is_pure_vegetarian)
+    pure_text = (
         "Pure Vegetarian"
         if restaurant.is_pure_vegetarian is True
         else "Not Pure Vegetarian"
         if restaurant.is_pure_vegetarian is False
+        else "Unknown"
+    )
+    vegan_class = (
+        "status-vegan"
+        if restaurant.is_vegan is True
+        else "status-not"
+        if restaurant.is_vegan is False
+        else "status-unknown"
+    )
+    vegan_text = (
+        "Vegan"
+        if restaurant.is_vegan is True
+        else "Not Vegan"
+        if restaurant.is_vegan is False
         else "Unknown"
     )
     st.markdown("<div class='restaurant-card'>", unsafe_allow_html=True)
@@ -86,7 +102,8 @@ def render_restaurant_card(restaurant: Restaurant) -> None:
     if restaurant.rating is not None:
         st.markdown(f"**Rating:** {restaurant.rating}")
     st.markdown(
-        f"<span class='status-pill {status_class}'>{status_text}</span>",
+        f"<span class='status-pill {pure_class}'>{pure_text}</span>"
+        f"<span class='status-pill {vegan_class}'>{vegan_text}</span>",
         unsafe_allow_html=True,
     )
     if restaurant.review_snippet:
