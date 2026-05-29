@@ -22,6 +22,7 @@ class Restaurant:
     is_vegan: Optional[bool]
     review_snippet: Optional[str]
     reviews: List[Review]
+    justification: Optional[str] = None
 
 
 def build_restaurant(
@@ -60,6 +61,8 @@ def build_restaurant(
     if is_vegan is not None or is_lacto is not None:
         is_pure_vegetarian = bool(is_vegan or is_lacto)
 
+    justification = classification_data.get("Justification")
+
     return Restaurant(
         id=result.get("place_id", ""),
         name=result.get("name", "Unknown"),
@@ -69,4 +72,5 @@ def build_restaurant(
         is_vegan=is_vegan,
         review_snippet=review_snippet,
         reviews=reviews,
+        justification=justification,
     )

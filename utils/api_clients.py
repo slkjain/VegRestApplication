@@ -53,9 +53,22 @@ def get_openai_api_key() -> str:
     return key
 
 
-def search_restaurants(location: str) -> List[Dict]:
+def search_restaurants(restaurant_name: str, location: str) -> Dict:
+    """Search for a specific restaurant by name and location.
+    
+    Args:
+        restaurant_name: Name of the restaurant to search for
+        location: Location/city where the restaurant is located
+        
+    Returns:
+        Dictionary containing the restaurant's details including place_id
+        
+    Raises:
+        RuntimeError: If Google Places API error occurs
+        ValueError: If no restaurant is found matching the criteria
+    """
     params = {
-        "query": f"restaurants near {location}",
+        "query": f"{restaurant_name} in {location}",
         "type": "restaurant",
         "key": get_google_api_key(),
     }
@@ -72,10 +85,25 @@ def search_restaurants(location: str) -> List[Dict]:
             )
         raise RuntimeError(f"Google Places search error: {payload.get('status')} - {error_msg}")
 
-    return payload.get("results", [])
+    results = payload.get("results", [])
+    if not results:
+        raise ValueError(f"No restaurant found with name '{restaurant_name}' in '{location}'")
+    
+    return results[0]
 
 
 def fetch_restaurant_reviews(place_id: str) -> List[Dict]:
+    """Fetch reviews for a specific restaurant.
+    
+    Args:
+        place_id: Google Places ID of the restaurant (obtained from search_restaurants)
+        
+    Returns:
+        List of review dictionaries containing review text and metadata
+        
+    Raises:
+        RuntimeError: If Google Places API error occurs
+    """
     params = {
         "place_id": place_id,
         "fields": "review",

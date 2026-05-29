@@ -57,6 +57,8 @@ def get_env_message() -> Optional[str]:
 def create_session_state() -> None:
     if "restaurants" not in st.session_state:
         st.session_state.restaurants = []
+    if "restaurant_name" not in st.session_state:
+        st.session_state.restaurant_name = ""
     if "location" not in st.session_state:
         st.session_state.location = ""
     if "filter_vegetarian" not in st.session_state:
@@ -106,8 +108,8 @@ def render_restaurant_card(restaurant: Restaurant) -> None:
         f"<span class='status-pill {vegan_class}'>{vegan_text}</span>",
         unsafe_allow_html=True,
     )
-    if restaurant.review_snippet:
-        st.markdown(f"<div class='review-snippet'>{restaurant.review_snippet}...</div>", unsafe_allow_html=True)
+    if restaurant.justification:
+        st.markdown(f"**Justification:** {restaurant.justification}")
     with st.expander("View reviews"):
         if restaurant.reviews:
             for review in restaurant.reviews:
@@ -148,17 +150,18 @@ def classify_search_results(results: List[dict]) -> List[Restaurant]:
 
 
 def on_search() -> None:
+    restaurant_name = st.session_state.restaurant_name.strip()
     location = st.session_state.location.strip()
     st.session_state.error_message = ""
-    if not location:
-        st.session_state.error_message = "Please enter a location or address to search."
+    if not restaurant_name or not location:
+        st.session_state.error_message = "Please enter both restaurant name and location to search."
         st.session_state.restaurants = []
         return
 
     try:
-        with st.spinner("Searching restaurants and analyzing vegetarian status..."):
-            raw_results = search_restaurants(location)
-            st.session_state.restaurants = classify_search_results(raw_results[:5])
+        with st.spinner("Searching restaurant and analyzing vegetarian status..."):
+            raw_result = search_restaurants(restaurant_name, location)
+            st.session_state.restaurants = classify_search_results([raw_result])
     except Exception as exc:
         st.session_state.restaurants = []
         st.session_state.error_message = str(exc)
@@ -184,7 +187,11 @@ def main() -> None:
         return
 
     with st.form(key="search_form"):
-        st.session_state.location = st.text_input("Location", value=st.session_state.location)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.session_state.restaurant_name = st.text_input("Restaurant Name", value=st.session_state.restaurant_name)
+        with col2:
+            st.session_state.location = st.text_input("Location", value=st.session_state.location)
         st.session_state.filter_vegetarian = st.checkbox("Show only pure vegetarian restaurants", value=st.session_state.filter_vegetarian)
         submitted = st.form_submit_button("Search")
         if submitted:
