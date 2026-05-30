@@ -22,6 +22,7 @@ class Restaurant:
     is_vegan: Optional[bool]
     review_snippet: Optional[str]
     reviews: List[Review]
+    restaurant_image_url: Optional[str] = None
     justification: Optional[str] = None
 
 
@@ -30,6 +31,7 @@ def build_restaurant(
     classification: Union[str, Dict[str, Any]],
     review_snippet: Optional[str],
     reviews: List[Review],
+    restaurant_image_url: Optional[str] = None,
 ) -> Restaurant:
     classification_data: Dict[str, Any] = {}
     if isinstance(classification, str):
@@ -72,5 +74,6 @@ def build_restaurant(
         is_vegan=is_vegan,
         review_snippet=review_snippet,
         reviews=reviews,
+        restaurant_image_url=restaurant_image_url,
         justification=justification,
     )

@@ -12,6 +12,7 @@ load_dotenv()
 
 GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 GOOGLE_PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
+GOOGLE_PLACE_PHOTO_URL = "https://maps.googleapis.com/maps/api/place/photo"
 
 OPENAI_MODEL = "gpt-5"
 
@@ -94,21 +95,25 @@ def search_restaurants(restaurant_name: str, location: str) -> Dict:
     return results[0]
 
 
-def fetch_restaurant_reviews(place_id: str) -> List[Dict]:
-    """Fetch reviews for a specific restaurant.
+def build_photo_url(photo_reference: str, max_width: int = 800) -> str:
+    return f"{GOOGLE_PLACE_PHOTO_URL}?maxwidth={max_width}&photoreference={photo_reference}&key={get_google_api_key()}"
+
+
+def fetch_restaurant_reviews(place_id: str) -> Dict:
+    """Fetch restaurant details including reviews and photos.
     
     Args:
         place_id: Google Places ID of the restaurant (obtained from search_restaurants)
         
     Returns:
-        List of review dictionaries containing review text and metadata
+        Dictionary containing restaurant details, reviews, and photos
         
     Raises:
         RuntimeError: If Google Places API error occurs
     """
     params = {
         "place_id": place_id,
-        "fields": "review",
+        "fields": "review,photo",
         "key": get_google_api_key(),
     }
     response = requests.get(GOOGLE_PLACE_DETAILS_URL, params=params, timeout=15)
@@ -124,8 +129,7 @@ def fetch_restaurant_reviews(place_id: str) -> List[Dict]:
             )
         raise RuntimeError(f"Google Place details error: {payload.get('status')} - {error_msg}")
 
-    result = payload.get("result", {})
-    return result.get("reviews", [])
+    return payload.get("result", {})
 
 
 def _build_classification_prompt(name: str, address: str, reviews: List[Dict]) -> str:

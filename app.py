@@ -4,6 +4,7 @@ from typing import List, Optional
 import streamlit as st
 
 from utils.api_clients import (
+    build_photo_url,
     classify_restaurant,
     extract_review_snippet,
     fetch_restaurant_reviews,
@@ -116,6 +117,9 @@ def render_restaurant_card(restaurant: Restaurant) -> None:
                 st.markdown("---")
         else:
             st.info("No reviews are available for this restaurant.")
+    if restaurant.restaurant_image_url:
+        st.markdown("**Restaurant Image:**")
+        st.image(restaurant.restaurant_image_url, caption="Restaurant", width=700)
     st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -123,15 +127,16 @@ def classify_search_results(results: List[dict]) -> List[Restaurant]:
     restaurants: List[Restaurant] = []
     for result in results:
         try:
-            reviews_data = fetch_restaurant_reviews(result.get("place_id", ""))
+            details = fetch_restaurant_reviews(result.get("place_id", ""))
+            review_list = details.get("reviews", [])
             classification = classify_restaurant(
                 result.get("name", "Unknown"),
                 result.get("formatted_address", ""),
-                reviews_data,
+                review_list,
             )
-            snippet = extract_review_snippet(reviews_data)
+            snippet = extract_review_snippet(review_list)
             reviews = []
-            for review in reviews_data[:5]:
+            for review in review_list[:5]:
                 reviews.append(
                     Review(
                         author_name=review.get("author_name"),
@@ -140,7 +145,13 @@ def classify_search_results(results: List[dict]) -> List[Restaurant]:
                         text=review.get("text", ""),
                     )
                 )
-            restaurant = build_restaurant(result, classification, snippet, reviews)
+            restaurant_image_url = None
+            photos = details.get("photos", [])
+            if photos:
+                photo_reference = photos[0].get("photo_reference")
+                if photo_reference:
+                    restaurant_image_url = build_photo_url(photo_reference)
+            restaurant = build_restaurant(result, classification, snippet, reviews, restaurant_image_url)
             restaurants.append(restaurant)
         except Exception as exc:
             st.warning(f"Failed to classify {result.get('name', 'restaurant')}: {exc}")
@@ -157,7 +168,7 @@ def on_search() -> None:
         return
 
     try:
-        with st.spinner("Searching restaurant and analyzing vegetarian status..."):
+        with st.spinner("Searching restaurant and analyzing vegetarian/vegan status..."):
             raw_result = search_restaurants(restaurant_name, location)
             st.session_state.restaurants = classify_search_results([raw_result])
     except Exception as exc:
