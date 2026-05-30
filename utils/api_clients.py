@@ -37,6 +37,8 @@ Example output:
 
 If the restaurant details do not contain enough information to confirm a diet is supported,
 default that value to false.
+
+Remember if the restaurant name includes keywords like "vegan" or "vegetarian" that is a strong signal.
 """
 
 def get_google_api_key() -> str:
@@ -136,18 +138,7 @@ def _build_classification_prompt(name: str, address: str, reviews: List[Dict]) -
 
     review_block = "\n".join(review_texts) if review_texts else "No review text available."
 
-    # prompt = (
-    #     "You are a food classification assistant. Determine whether the following restaurant is a pure vegetarian restaurant. "
-    #     "Pure vegetarian means the restaurant does not serve meat, fish, or animal products. "
-    #     "Respond with exactly one of: Pure Vegetarian, Not Pure Vegetarian, Unknown.\n\n"
-    #     f"Restaurant: {name}\n"
-    #     f"Address: {address}\n"
-    #     "Reviews:\n"
-    #     f"{review_block}\n\n"
-    #     "Based on the available information, is this restaurant pure vegetarian?"
-    # )
-
-    prompt = f"Restaurant reviews:\n\n{review_block}"
+    prompt = f"Restaurant name:{name},Restaurant reviews:\n\n{review_block}"
     return prompt
 
 

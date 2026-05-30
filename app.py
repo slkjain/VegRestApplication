@@ -61,8 +61,6 @@ def create_session_state() -> None:
         st.session_state.restaurant_name = ""
     if "location" not in st.session_state:
         st.session_state.location = ""
-    if "filter_vegetarian" not in st.session_state:
-        st.session_state.filter_vegetarian = False
     if "error_message" not in st.session_state:
         st.session_state.error_message = ""
 
@@ -167,19 +165,13 @@ def on_search() -> None:
         st.session_state.error_message = str(exc)
 
 
-def filter_restaurants(restaurants: List[Restaurant], only_vegetarian: bool) -> List[Restaurant]:
-    if not only_vegetarian:
-        return restaurants
-    return [r for r in restaurants if r.is_pure_vegetarian is True]
-
-
 def main() -> None:
-    st.set_page_config(page_title="Veg Restaurant Finder", layout="wide")
+    st.set_page_config(page_title="Veg Restaurant Checker", layout="wide")
     create_session_state()
     local_css()
 
-    st.title("Veg Restaurant Finder")
-    st.write("Search restaurants by location and check whether they are pure vegetarian using Google and OpenAI APIs.")
+    st.title("Veg Restaurant Checker")
+    st.write("Check if restaurants are pure vegetarian (lacto-vegetarian) or Vegan using Google and OpenAI APIs.")
 
     env_message = get_env_message()
     if env_message:
@@ -192,7 +184,6 @@ def main() -> None:
             st.session_state.restaurant_name = st.text_input("Restaurant Name", value=st.session_state.restaurant_name)
         with col2:
             st.session_state.location = st.text_input("Location", value=st.session_state.location)
-        st.session_state.filter_vegetarian = st.checkbox("Show only pure vegetarian restaurants", value=st.session_state.filter_vegetarian)
         submitted = st.form_submit_button("Search")
         if submitted:
             on_search()
@@ -201,13 +192,9 @@ def main() -> None:
         st.error(st.session_state.error_message)
 
     if st.session_state.restaurants:
-        filtered = filter_restaurants(st.session_state.restaurants, st.session_state.filter_vegetarian)
-        if not filtered:
-            st.info("No restaurants match the selected filter. Try a broader search or disable the vegetarian-only filter.")
-        else:
-            st.markdown(f"#### Results ({len(filtered)})")
-            for restaurant in filtered:
-                render_restaurant_card(restaurant)
+        st.markdown(f"#### Results ({len(st.session_state.restaurants)})")
+        for restaurant in st.session_state.restaurants:
+            render_restaurant_card(restaurant)
     elif not st.session_state.error_message:
         st.info("Enter a location and press Search to discover restaurants.")
 
