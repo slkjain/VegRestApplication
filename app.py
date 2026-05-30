@@ -207,8 +207,7 @@ def main() -> None:
         for restaurant in st.session_state.restaurants:
             render_restaurant_card(restaurant)
     elif not st.session_state.error_message:
-        st.info("Enter a location and press Search to discover restaurants.")
-
+        st.info("Enter a restaurant name and location and press Search.")
 
 if __name__ == "__main__":
     main()
