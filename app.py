@@ -18,27 +18,86 @@ def local_css() -> None:
     st.markdown(
         """
         <style>
+        body {
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 50%, #f3f8f9 100%);
+            color: #0f172a;
+        }
+        .hero {
+            padding: 48px 32px 32px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 18px 50px rgba(34, 76, 127, 0.08);
+            margin-bottom: 32px;
+        }
+        .hero h1 {
+            margin: 0 0 12px;
+            font-size: 3rem;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+        .hero p {
+            margin: 0;
+            font-size: 1.05rem;
+            color: #475569;
+            line-height: 1.7;
+        }
+        .search-card {
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            margin-bottom: 32px;
+        }
+        .results-note {
+            margin-top: 0.35rem;
+            color: #475569;
+            font-size: 0.98rem;
+        }
+        .restaurant-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        }
         .restaurant-card {
-            border: 1px solid #e6e6e6;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            background: #fff;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 20px;
+            padding: 22px;
+            background: #ffffff;
+            box-shadow: 0 10px 32px rgba(15, 23, 42, 0.05);
+        }
+        .restaurant-card h3 {
+            margin-top: 0;
         }
         .status-pill {
-            display: inline-block;
-            padding: 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
             border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             margin-right: 8px;
+            margin-bottom: 8px;
         }
-        .status-pure { background: #d4f5d4; color: #1f6b1f; }
-        .status-vegan { background: #d0e6ff; color: #0f4c81; }
-        .status-not { background: #ffe2e0; color: #8b1a1a; }
-        .status-unknown { background: #f7f0d6; color: #705b10; }
-        .review-snippet { margin-top: 8px; color: #555; }
+        .status-pure { background: #def7ec; color: #046c4e; }
+        .status-vegan { background: #dbeafe; color: #1e40af; }
+        .status-not { background: #fee2e2; color: #991b1b; }
+        .status-unknown { background: #fef3c7; color: #92400e; }
+        .review-snippet {
+            margin-top: 12px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+        .restaurant-meta {
+            color: #475569;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+        .restaurant-card img {
+            width: 100%;
+            border-radius: 16px;
+            margin-top: 16px;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -110,6 +169,8 @@ def render_restaurant_card(restaurant: Restaurant) -> None:
     )
     if restaurant.justification:
         st.markdown(f"**Justification:** {restaurant.justification}")
+    if restaurant.review_snippet:
+        st.markdown(f"<div class='review-snippet'>{restaurant.review_snippet}</div>", unsafe_allow_html=True)
     with st.expander("View reviews"):
         if restaurant.reviews:
             for review in restaurant.reviews:
@@ -182,32 +243,44 @@ def main() -> None:
     create_session_state()
     local_css()
 
-    st.title("Veg Restaurant Checker")
-    st.write("Check if restaurants are pure vegetarian (lacto-vegetarian) or Vegan using Google and OpenAI APIs.")
+    st.markdown(
+        """
+        <div class="hero">
+            <h1>Veg Restaurant Checker</h1>
+            <p>Search multiple restaurants at once and see vegetarian and vegan suitability in a polished, modern interface.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     env_message = get_env_message()
     if env_message:
         st.error(env_message)
         return
 
+    st.markdown("<div class='search-card'>", unsafe_allow_html=True)
     with st.form(key="search_form"):
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([2, 1])
         with col1:
-            st.session_state.restaurant_name = st.text_input("Restaurant Name", value=st.session_state.restaurant_name)
+            st.session_state.restaurant_name = st.text_input("Restaurant name or keyword", value=st.session_state.restaurant_name)
         with col2:
             st.session_state.location = st.text_input("Location", value=st.session_state.location)
         submitted = st.form_submit_button("Search")
         if submitted:
             on_search()
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if st.session_state.error_message:
         st.error(st.session_state.error_message)
 
     if st.session_state.restaurants:
         st.markdown(f"#### Results ({len(st.session_state.restaurants)})")
-        st.write(f"Showing up to {MAX_SEARCH_RESULTS} matching restaurants for your query.")
-        for restaurant in st.session_state.restaurants:
-            render_restaurant_card(restaurant)
+        st.markdown(f"<p class='results-note'>Showing up to {MAX_SEARCH_RESULTS} matching restaurants for your query.</p>", unsafe_allow_html=True)
+        with st.container():
+            cols = st.columns(2)
+            for index, restaurant in enumerate(st.session_state.restaurants):
+                with cols[index % 2]:
+                    render_restaurant_card(restaurant)
     elif not st.session_state.error_message:
         st.info("Enter a restaurant name and location and press Search.")
 
