@@ -4,6 +4,7 @@ from typing import List, Optional
 import streamlit as st
 
 from utils.api_clients import (
+    MAX_SEARCH_RESULTS,
     build_photo_url,
     classify_restaurant,
     extract_review_snippet,
@@ -168,9 +169,9 @@ def on_search() -> None:
         return
 
     try:
-        with st.spinner("Searching restaurant and analyzing vegetarian/vegan status..."):
-            raw_result = search_restaurants(restaurant_name, location)
-            st.session_state.restaurants = classify_search_results([raw_result])
+        with st.spinner("Searching restaurants and analyzing vegetarian/vegan status..."):
+            raw_results = search_restaurants(restaurant_name, location)
+            st.session_state.restaurants = classify_search_results(raw_results)
     except Exception as exc:
         st.session_state.restaurants = []
         st.session_state.error_message = str(exc)
@@ -204,6 +205,7 @@ def main() -> None:
 
     if st.session_state.restaurants:
         st.markdown(f"#### Results ({len(st.session_state.restaurants)})")
+        st.write(f"Showing up to {MAX_SEARCH_RESULTS} matching restaurants for your query.")
         for restaurant in st.session_state.restaurants:
             render_restaurant_card(restaurant)
     elif not st.session_state.error_message:

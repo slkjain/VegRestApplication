@@ -13,6 +13,7 @@ load_dotenv()
 GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 GOOGLE_PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
 GOOGLE_PLACE_PHOTO_URL = "https://maps.googleapis.com/maps/api/place/photo"
+MAX_SEARCH_RESULTS = 5
 
 OPENAI_MODEL = "gpt-5"
 
@@ -56,19 +57,19 @@ def get_openai_api_key() -> str:
     return key
 
 
-def search_restaurants(restaurant_name: str, location: str) -> Dict:
-    """Search for a specific restaurant by name and location.
+def search_restaurants(restaurant_name: str, location: str) -> List[Dict[str, Any]]:
+    """Search for restaurants matching a query string and location.
     
     Args:
-        restaurant_name: Name of the restaurant to search for
+        restaurant_name: Search string for restaurant names or keywords
         location: Location/city where the restaurant is located
         
     Returns:
-        Dictionary containing the restaurant's details including place_id
+        List of restaurant result dictionaries from Google Places search
         
     Raises:
         RuntimeError: If Google Places API error occurs
-        ValueError: If no restaurant is found matching the criteria
+        ValueError: If no restaurants are found matching the criteria
     """
     params = {
         "query": f"{restaurant_name} in {location}",
@@ -90,9 +91,9 @@ def search_restaurants(restaurant_name: str, location: str) -> Dict:
 
     results = payload.get("results", [])
     if not results:
-        raise ValueError(f"No restaurant found with name '{restaurant_name}' in '{location}'")
-    
-    return results[0]
+        raise ValueError(f"No restaurants found for '{restaurant_name}' in '{location}'")
+
+    return results[:MAX_SEARCH_RESULTS]
 
 
 def build_photo_url(photo_reference: str, max_width: int = 800) -> str:
